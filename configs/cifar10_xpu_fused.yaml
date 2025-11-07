@@ -1,0 +1,61 @@
+seed: 42
+
+device: xpu
+ipex: off               # IPEX 끄고 “커널 튜닝 효과”만 확인
+
+misc:
+  channels_last: true
+  use_prefetcher: true
+  log_interval: 30
+  pin_memory_device: xpu
+
+dataset:
+  name: cifar10
+  root: ./data
+  download: true
+  img_size: 32
+  num_classes: 10
+  augment:
+    random_crop: true
+    random_crop_pad: 4
+    random_flip: true
+    cutout: 0
+
+dataloader:
+  batch_size: 128
+  eval_batch_size: 128
+  num_workers: 6
+  pin_memory: true
+  pin_memory_device: xpu
+  prefetch_factor: 4
+  eval_prefetch_factor: 4
+  persistent_workers: true
+  drop_last: false
+  shuffle: true
+
+model:
+  name: ops_tinycifarnet_sycl
+  num_classes: 10
+  width_mult: 1.0
+  widths: [64, 128, 256, 256]
+  ffn_expand: 4
+
+train:
+  epochs: 100
+  lr: 0.01
+  momentum: 0.9
+  weight_decay: 5.0e-4
+  nesterov: false
+  label_smoothing: 0.0
+  val_interval: 1
+  dropout: 0.10
+
+amp:
+  enabled: true
+
+eval:
+  topk: [1, 5]
+
+log:
+  out_dir: ./outputs
+  run_name: fused_xpu

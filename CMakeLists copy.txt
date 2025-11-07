@@ -1,0 +1,67 @@
+cmake_minimum_required(VERSION 3.20)
+project(fused_kernels_xpu CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Torch / Python
+find_package(Torch REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
+add_library(fused_conv3x3_bn_relu_xpu SHARED
+  cpp/fused_conv3x3_bnfold_relu_usm_xpu.cpp
+)
+
+add_library(custom_conv3x3_bn_relu_xpu SHARED
+  cpp/custom_conv3x3_bn_relu_xpu.cpp
+)
+
+target_include_directories(fused_conv3x3_bn_relu_xpu PRIVATE
+  ${TORCH_INCLUDE_DIRS}
+  ${Python3_INCLUDE_DIRS}
+)
+
+target_include_directories(custom_conv3x3_bn_relu_xpu PRIVATE
+  ${TORCH_INCLUDE_DIRS}
+  ${Python3_INCLUDE_DIRS}
+)
+
+# ★ SYCL 컴파일/링크
+target_compile_options(fused_conv3x3_bn_relu_xpu PRIVATE -fPIC -fsycl)
+target_link_options(  fused_conv3x3_bn_relu_xpu PRIVATE -fsycl -Wl,-z,defs)
+
+target_compile_options(custom_conv3x3_bn_relu_xpu PRIVATE -fPIC -fsycl)
+target_link_options(  custom_conv3x3_bn_relu_xpu PRIVATE -fsycl -Wl,-z,defs)
+
+# ★★ 가장 중요: Torch에 명시적으로 링크
+# 우선 권장: 임포트 타깃
+if (TARGET Torch::Torch)
+  target_link_libraries(fused_conv3x3_bn_relu_xpu PRIVATE Torch::Torch)
+  target_link_libraries(custom_conv3x3_bn_relu_xpu PRIVATE Torch::Torch)
+else()
+  # 혹시 구형 설정이면 변수로
+  target_link_libraries(fused_conv3x3_bn_relu_xpu PRIVATE ${TORCH_LIBRARIES})
+  target_link_libraries(custom_conv3x3_bn_relu_xpu PRIVATE ${TORCH_LIBRARIES})
+endif()
+
+# XPU 심볼들 사용하므로 명시적 링크(환경에 따라 Torch::Torch에 이미 포함됐을 수도)
+find_library(TORCH_XPU_LIB torch_xpu PATHS "${TORCH_INSTALL_PREFIX}/lib" NO_DEFAULT_PATH)
+find_library(C10_XPU_LIB   c10_xpu   PATHS "${TORCH_INSTALL_PREFIX}/lib" NO_DEFAULT_PATH)
+if (TORCH_XPU_LIB)
+  target_link_libraries(fused_conv3x3_bn_relu_xpu PRIVATE ${TORCH_XPU_LIB})
+  target_link_libraries(custom_conv3x3_bn_relu_xpu PRIVATE ${TORCH_XPU_LIB})
+endif()
+if (C10_XPU_LIB)
+  target_link_libraries(fused_conv3x3_bn_relu_xpu PRIVATE ${C10_XPU_LIB})
+  target_link_libraries(custom_conv3x3_bn_relu_xpu PRIVATE ${C10_XPU_LIB})
+endif()
+
+set_target_properties(fused_conv3x3_bn_relu_xpu PROPERTIES
+  PREFIX ""
+  OUTPUT_NAME "libfused_conv3x3_bn_relu_xpu"
+)
+
+set_target_properties(custom_conv3x3_bn_relu_xpu PROPERTIES
+  PREFIX ""
+  OUTPUT_NAME "libcustom_conv3x3_bn_relu_xpu"
+)

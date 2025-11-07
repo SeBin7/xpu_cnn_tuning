@@ -1,0 +1,29 @@
+seed: 42
+data:
+  root: ./data
+  num_workers: 4
+  batch_size: 128
+  img_size: 32
+train:
+  epochs: 120
+  lr: 0.002
+  weight_decay: 0.0001
+  optimizer: adamw          # sgd | adamw
+  momentum: 0.9             # used if sgd
+  warmup_epochs: 5
+  label_smoothing: 0.05
+  mixup_alpha: 0.0          # 0 to disable
+  cutmix_alpha: 0.0         # 0 to disable
+  dropout: 0.1
+model:
+  name: tinycifarnet
+  widths: [64, 128, 256, 256]
+  ffn_expand: 4
+  num_classes: 10
+misc:
+  channels_last: true
+  amp: true
+  log_interval: 50
+  ckpt_dir: ./outputs/checkpoints
+  log_dir: ./outputs/logs
+  ckpt_name: best_cifar10.pt

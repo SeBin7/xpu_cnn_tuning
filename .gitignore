@@ -1,0 +1,43 @@
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.egg-info/
+*.egg
+
+# Virtual environments
+.env
+.venv/
+.venv*/
+env/
+venv/
+
+# Build directories & CMake outputs
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+Makefile
+*.cmake
+compile_commands.json
+
+# Logs & checkpoints
+*.log
+*.pt
+*.pth
+
+# Generated data/results
+outputs/
+data/
+
+# Editor/OS metadata
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Backup artifacts
+*backup*
+*_backup/
+backup/

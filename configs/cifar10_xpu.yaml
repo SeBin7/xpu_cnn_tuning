@@ -1,0 +1,38 @@
+
+seed: 42
+
+data:
+  root: ./data
+  num_workers: 6
+  batch_size: 1280
+  img_size: 32
+  pin_memory: true
+  prefetch_factor: 4
+  persistent_workers: true
+
+misc:
+  amp: true
+  amp_dtype: bf16
+  channels_last: true
+  ckpt_dir: ./outputs/checkpoints
+  ckpt_name: best_cifar10_xpu.pt
+  log_dir: ./outputs/logs
+  log_interval: 20
+
+model:
+  name: tinycifarnet
+  num_classes: 10
+  widths: [64, 128, 256, 256]  # ★ 4개로! (마지막 256을 하나 더)
+  ffn_expand: 4                # ★ 누락된 키 추가 (기본 4 배 확장)
+
+train:
+  cutmix_alpha: 0.0
+  dropout: 0.1
+  epochs: 50
+  label_smoothing: 0.0
+  lr: 0.01
+  mixup_alpha: 0.0
+  optimizer: sgd          # sgd | adamw
+  momentum: 0.9             # used if sgd
+  warmup_epochs: 5
+  weight_decay: 0.0001

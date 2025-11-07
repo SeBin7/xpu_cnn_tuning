@@ -1,0 +1,61 @@
+seed: 0
+
+device: xpu            # "cpu" / "cuda" / "xpu"
+ipex: off              # CLI에서 --ipex on/off로도 제어 가능
+
+misc:
+  channels_last: true
+  use_prefetcher: true
+  log_interval: 30
+  pin_memory_device: xpu
+
+dataset:
+  name: cifar10
+  root: ./data
+  download: true
+  img_size: 32
+  num_classes: 10
+  augment:
+    random_crop: true
+    random_crop_pad: 4
+    random_flip: true
+    cutout: 0          # 0이면 사용 안 함
+
+dataloader:
+  batch_size: 128
+  eval_batch_size: 256
+  num_workers: 6
+  pin_memory: true
+  pin_memory_device: xpu
+  prefetch_factor: 4
+  eval_prefetch_factor: 4
+  persistent_workers: true
+  drop_last: false
+  shuffle: true
+
+model:
+  name: tinycifarnet     # ← baseline
+  num_classes: 10
+  width_mult: 1.0        # 채널 폭(두 케이스 동일)
+  widths: [64, 128, 256, 256]
+  ffn_expand: 4
+
+train:
+  epochs: 100              # 속성 비교만 먼저 (원하면 늘려서 정량화)
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 5.0e-4
+  nesterov: false
+  label_smoothing: 0.0
+  val_interval: 1
+  dropout: 0.10
+
+amp:
+  enabled: false         # 정확 비교를 위해 끔
+
+eval:
+  topk: [1, 5]
+
+log:
+  out_dir: ./outputs
+  run_name: baseline_xpu

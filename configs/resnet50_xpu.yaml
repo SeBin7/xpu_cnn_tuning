@@ -1,0 +1,32 @@
+seed: 42
+
+data:
+  root: ./data
+  img_size: 32
+  batch_size: 2480
+  num_workers: 6
+  pin_memory: true
+  prefetch_factor: 4
+  persistent_workers: true
+
+misc:
+  channels_last: true
+  log_dir: ./outputs/logs
+  ckpt_dir: ./outputs/ckpts
+  ckpt_name: resnet50_xpu_best.pth
+  log_interval: 5   # 20스텝/에폭 기준 너무 잦지 않게
+
+model:
+  name: resnet50
+  num_classes: 10
+
+train:
+  optimizer: sgd           # sgd | adamw
+  lr: 0.02                 # 256→2480 스케일링(0.002 × 9.69 ≈ 0.0194 → 0.02)
+  momentum: 0.9
+  weight_decay: 0.0005     # CIFAR-10 컨벤션
+  label_smoothing: 0.1
+  epochs: 60
+  grad_accum: 1
+  mixup_alpha: 0.0         # (원하면 0.1로 테스트 가능)
+  cutmix_alpha: 0.0
